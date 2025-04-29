@@ -1,0 +1,47 @@
+<div class="citation-container">
+    <div class="citation-header">
+      <h1>Citation Checker</h1>
+      <p class="subtitle">Check if one paper cites another</p>
+    </div>
+    
+    <div class="card">
+      <form (ngSubmit)="checkCitation()">
+        <div class="form-group">
+          <label for="from">From Paper ID:</label>
+          <input
+            id="from"
+            type="text"
+            [(ngModel)]="from"
+            name="from"
+            placeholder="Enter source paper ID"
+            required
+          />
+        </div>
+    
+        <div class="form-group">
+          <label for="to">To Paper ID:</label>
+          <input
+            id="to"
+            type="text"
+            [(ngModel)]="to"
+            name="to"
+            placeholder="Enter target paper ID"
+            required
+          />
+        </div>
+    
+        <button type="submit" class="btn-check">Check Citation</button>
+      </form>
+    
+      <div class="result" *ngIf="cites !== null">
+        <div class="result-card" [ngClass]="{'result-exists': cites, 'result-missing': !cites}">
+          <div class="result-icon">
+            <i class="material-icons">{{ cites ? 'check_circle' : 'cancel' }}</i>
+          </div>
+          <div class="result-text">
+            <p>Citation status: <strong>{{ cites ? 'Exists' : 'Not Found' }}</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
