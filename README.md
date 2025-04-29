@@ -310,10 +310,20 @@ NDRA_BROADCAST_ADDRESS=192.168.248.104   -e CASSANDRA_LISTEN_ADDRESS=192.168.248
 a.	`docker exec –it cassandra-seed cqlsh`
 8.	On other terminal, use command `docker exec -it cassandra-seed nodetool status` to get the list of all the nodes which are currently connected to the cluster and their status.
 
+For Creating keyspace : 
+CREATE KEYSPACE my_keyspace
+WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
+
+after use my_keyspace ;
+
+Then perform normal sql crud operations 
+
 
 9.	Once all the PCs show up in the cassandra Cluster, we can run commands in the cql lang to create and update database from any of the nodes
 
 10.	Even if one node goes down, the other takes over, processing the queries till the nodes come back together, no data is lost
+
+
 
 
 
