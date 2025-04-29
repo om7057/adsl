@@ -299,10 +299,10 @@ Note Down the IPs of all the PC's in the network
 5.	Run the following commands:
 a.	On the Seed node:
 i.	`docker run -d --name cassandra-seed   -e CASSANDRA_CLUSTER_NAME="TestCluster"   -e CASSANDRA_BROADCAST_ADDRESS=192.168.248.154
-   -e CASSANDRA_LISTEN_ADDRESS=192.168.248.154   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   -p 7000:7000   -p 9042:9042   cassandra:latest`
+   -e CASSANDRA_LISTEN_ADDRESS=192.168.248.154   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   --network=host   cassandra:latest`
 b.	For other nodes:
 i.	`docker run -d --name cassandra-node2   -e CASSANDRA_CLUSTER_NAME="TestCluster"   -e CASSANDRA_SEEDS=192.168.248.154   -e CASSA
-NDRA_BROADCAST_ADDRESS=192.168.248.104   -e CASSANDRA_LISTEN_ADDRESS=192.168.248.104   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   -p 7000:7000   -p 9042:9042   cassandra:latest`
+NDRA_BROADCAST_ADDRESS=192.168.248.104   -e CASSANDRA_LISTEN_ADDRESS=192.168.248.104   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   --network=host   cassandra:latest`
 6.	Through docker, start the container using docker start, watch the logs by `docker logs –f <container-name>`. 
 7.	To enter the container use command:
 
