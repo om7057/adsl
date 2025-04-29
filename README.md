@@ -187,7 +187,7 @@ MATCH (a:TrainStation {city: 'Copenhagen'})
 MATCH (b:Location)
 WITH point({latitude: a.latitude, longitude: a.longitude}) AS center,
      point({latitude: b.latitude, longitude: b.longitude}) AS p, b
-WHERE point.distance(center, p) < 10000  // e.g., 10km radius
+WHERE point.distance(center, p) < 10000  
 RETURN b.city, point.distance(center, p) AS dist
 ORDER BY dist ASC
 
@@ -197,7 +197,7 @@ MATCH (a:TrainStation {city: 'Copenhagen'})
 MATCH (b:Location)
 WITH point({latitude: a.latitude, longitude: a.longitude}) AS center,
      point({latitude: b.latitude, longitude: b.longitude}) AS p, b
-WHERE point.distance(center, p) < 10000  // e.g., 10km radius
+WHERE point.distance(center, p) < 10000  
 RETURN b.city, point.distance(center, p) AS dist
 ORDER BY dist ASC
 
