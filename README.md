@@ -283,32 +283,137 @@ RETURN a, b, r, point.distance(pa, pb) AS dist
 ORDER BY dist;
 
 
+# ✅ Assignment 10 – Cassandra Cluster Setup using Docker
 
+## 🧰 Requirements
+- Docker installed on all PCs
+- Each PC must be connected to the same local network
+- Cassandra image from Docker Hub
+- Firewall disabled or ports opened (`7000`, `7001`, `7199`, `9042`)
 
+## 📥 Step 1: Pull the Cassandra Docker Image
 
-
-
-## Assignment 10
-
-
+```bash
 docker pull cassandra:latest
+```
 
-Note Down the IPs of all the PC's in the network
+## 🌐 Step 2: Get IPs of All PCs in the Network
 
-4.	1 node needs to be assigned as the cassandra seed node, where the PCs of other connect as a common point, pick one IP to do the same.
-5.	Run the following commands:
-a.	On the Seed node:
-i.	`docker run -d --name cassandra-seed   -e CASSANDRA_CLUSTER_NAME="TestCluster"   -e CASSANDRA_BROADCAST_ADDRESS=192.168.248.154
-   -e CASSANDRA_LISTEN_ADDRESS=192.168.248.154   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   --network=host   cassandra:latest`
-b.	For other nodes:
-i.	`docker run -d --name cassandra-node2   -e CASSANDRA_CLUSTER_NAME="TestCluster"   -e CASSANDRA_SEEDS=192.168.248.154   -e CASSA
-NDRA_BROADCAST_ADDRESS=192.168.248.104   -e CASSANDRA_LISTEN_ADDRESS=192.168.248.104   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   --network=host   cassandra:latest`
-6.	Through docker, start the container using docker start, watch the logs by `docker logs –f <container-name>`. 
-7.	To enter the container use command:
+Run on each PC:
+```bash
+ip a
+```
+Note the `inet` IP address under the Wi-Fi/Ethernet interface (e.g., `192.168.0.172`).
 
+## 🌱 Step 3: Seed Node Setup
 
-a.	`docker exec –it cassandra-seed cqlsh`
-8.	On other terminal, use command `docker exec -it cassandra-seed nodetool status` to get the list of all the nodes which are currently connected to the cluster and their status.
+Choose one machine as the **Seed Node**.
+
+### ✅ On Seed Node (e.g., IP = `192.168.0.172`):
+
+```bash
+docker run -d --name cassandra-seed   -e CASSANDRA_CLUSTER_NAME="TestCluster"   -e CASSANDRA_BROADCAST_ADDRESS=192.168.0.172   -e CASSANDRA_LISTEN_ADDRESS=192.168.0.172   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   -e MAX_HEAP_SIZE=512M   -e HEAP_NEWSIZE=100M   --network=host   cassandra:latest
+```
+
+> 🛠️ Why we added `MAX_HEAP_SIZE` and `HEAP_NEWSIZE`? Cassandra by default may get killed with `Exit(137)` due to memory spikes.
+
+## 🌿 Step 4: Connect Other Nodes
+
+Use the Seed Node’s IP in the command below.
+
+### ✅ On Node 2 (e.g., IP = `192.168.0.174`):
+
+```bash
+docker run -d --name cassandra-node2   -e CASSANDRA_CLUSTER_NAME="TestCluster"   -e CASSANDRA_SEEDS=192.168.0.172   -e CASSANDRA_BROADCAST_ADDRESS=192.168.0.174   -e CASSANDRA_LISTEN_ADDRESS=192.168.0.174   -e CASSANDRA_RPC_ADDRESS=0.0.0.0   -e MAX_HEAP_SIZE=512M   -e HEAP_NEWSIZE=100M   --network=host   cassandra:latest
+```
+
+Repeat for more nodes, adjusting the `BROADCAST_ADDRESS` and `LISTEN_ADDRESS`.
+
+## 🚀 Step 5: Monitor the Containers
+
+### ✅ Check status:
+```bash
+docker ps -a
+```
+
+### ✅ View logs (use proper hyphen `-`, not Word-style dash `–`):
+```bash
+docker logs -f cassandra-seed
+```
+Look for:
+```
+Created default superuser role 'cassandra'
+```
+
+## 🖥️ Step 6: Enter Cassandra Shell
+
+### ✅ Use this command (with correct `-`):
+```bash
+docker exec -it cassandra-seed cqlsh
+```
+
+Test:
+```sql
+SELECT release_version FROM system.local;
+```
+
+## 📊 Step 7: View Cluster Status
+
+```bash
+docker exec -it cassandra-seed nodetool status
+```
+
+You should see:
+```
+UN  192.168.0.172   ...   cassandra-seed
+UN  192.168.0.174   ...   cassandra-node2
+```
+`UN` = Up and Normal
+
+## 🗃️ Step 8: Create Keyspace and Table
+
+In `cqlsh`:
+```sql
+CREATE KEYSPACE my_keyspace WITH replication = {
+  'class': 'SimpleStrategy',
+  'replication_factor': 1
+};
+USE my_keyspace;
+
+CREATE TABLE students (
+  id UUID PRIMARY KEY,
+  name TEXT,
+  email TEXT
+);
+
+INSERT INTO students (id, name, email) VALUES (uuid(), 'Riya', 'riya@example.com');
+SELECT * FROM students;
+```
+
+## 🔁 Resilience Test (Optional)
+
+Try stopping one node:
+```bash
+docker stop cassandra-node2
+```
+
+Cassandra will continue working. When you start the node again:
+```bash
+docker start cassandra-node2
+```
+
+It will rejoin the cluster automatically with no data loss.
+
+## ✅ Common Fixes Recap
+
+| Issue                  | Fix                                                                 |
+|------------------------|----------------------------------------------------------------------|
+| `Exited (137)`         | Use `MAX_HEAP_SIZE=512M` and `HEAP_NEWSIZE=100M`                    |
+| File not found         | Use correct dashes (`-`, not `–`)                                   |
+| Container already exists | Use `docker rm -f container-name`                                 |
+| Firewall blocks ports  | Run `sudo ufw disable` or allow ports `7000`, `9042`, etc.          |
+| Wrong IP               | Always recheck with `ip a` before running Docker commands           |
+
 
 For Creating keyspace : 
 CREATE KEYSPACE my_keyspace
